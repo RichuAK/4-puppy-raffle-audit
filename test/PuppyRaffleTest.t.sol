@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import {Test, console} from "forge-std/Test.sol";
 import {PuppyRaffle} from "../src/PuppyRaffle.sol";
+import {HackRaffle} from "./HackRaffle.sol";
 
 contract PuppyRaffleTest is Test {
     PuppyRaffle puppyRaffle;
@@ -16,11 +17,7 @@ contract PuppyRaffleTest is Test {
     uint256 duration = 1 days;
 
     function setUp() public {
-        puppyRaffle = new PuppyRaffle(
-            entranceFee,
-            feeAddress,
-            duration
-        );
+        puppyRaffle = new PuppyRaffle(entranceFee, feeAddress, duration);
     }
 
     //////////////////////
@@ -212,5 +209,35 @@ contract PuppyRaffleTest is Test {
         puppyRaffle.selectWinner();
         puppyRaffle.withdrawFees();
         assertEq(address(feeAddress).balance, expectedPrizeAmount);
+    }
+
+    //////////////////////
+    /// AuditTests     ///
+    /////////////////////
+
+    function testAnyOneCantChangeFeeAddress() public {
+        address hacker = makeAddr("Hacker");
+        vm.prank(hacker);
+        vm.expectRevert();
+        puppyRaffle.changeFeeAddress(hacker);
+        // address newFeeAddress = puppyRaffle.feeAddress();
+    }
+
+    // function testCallOnEOA() public playersEntered {
+    //     address eoaSample = makeAddr("eoaSample");
+    //     vm.prank(eoaSample);
+    //     puppyRaffle.sendBalanceToAnyAddress(payable(eoaSample));
+    //     assertEq(0, address(puppyRaffle).balance);
+    // }
+
+    // test to check ReEntrancy. Works, sort of.
+    function testHackRaffle() public playersEntered {
+        uint256 startingRaffleBalance = address(puppyRaffle).balance;
+        HackRaffle hackRaffle = new HackRaffle{value: entranceFee}(address(puppyRaffle));
+        hackRaffle.enter();
+        hackRaffle.hackRefund();
+        uint256 endingRaffleBalance = address(puppyRaffle).balance;
+        // assert(address(puppyRaffle).balance ==  0);
+        assert((startingRaffleBalance - endingRaffleBalance) > entranceFee);
     }
 }

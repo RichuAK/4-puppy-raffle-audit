@@ -162,6 +162,15 @@ contract PuppyRaffle is ERC721, Ownable {
         require(success, "PuppyRaffle: Failed to withdraw fees");
     }
 
+    /**
+     *
+     * @dev not part of original source code. Added to test EOA call
+     */
+    // function sendBalanceToAnyAddress(address payable reciever) external {
+    //     (bool success,) = reciever.call{value: address(this).balance}("");
+    //     require(success, "PuppyRaffle: Failed to withdraw fees");
+    // }
+
     /// @notice only the owner of the contract can change the feeAddress
     /// @param newFeeAddress the new address to send fees to
     function changeFeeAddress(address newFeeAddress) external onlyOwner {
