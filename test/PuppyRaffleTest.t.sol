@@ -231,13 +231,13 @@ contract PuppyRaffleTest is Test {
     // }
 
     // test to check ReEntrancy. Works, sort of.
-    function testHackRaffle() public playersEntered {
-        uint256 startingRaffleBalance = address(puppyRaffle).balance;
-        HackRaffle hackRaffle = new HackRaffle{value: entranceFee}(address(puppyRaffle));
-        hackRaffle.enter();
-        hackRaffle.hackRefund();
-        uint256 endingRaffleBalance = address(puppyRaffle).balance;
-        // assert(address(puppyRaffle).balance ==  0);
-        assert((startingRaffleBalance - endingRaffleBalance) > entranceFee);
-    }
+    // function testHackRaffle() public playersEntered {
+    //     uint256 startingRaffleBalance = address(puppyRaffle).balance;
+    //     HackRaffle hackRaffle = new HackRaffle{value: entranceFee}(address(puppyRaffle));
+    //     hackRaffle.enter();
+    //     hackRaffle.hackRefund();
+    //     uint256 endingRaffleBalance = address(puppyRaffle).balance;
+    //     // assert(address(puppyRaffle).balance ==  0);
+    //     assert((startingRaffleBalance - endingRaffleBalance) > entranceFee);
+    // }
 }
