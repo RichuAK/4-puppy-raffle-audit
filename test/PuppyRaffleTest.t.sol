@@ -231,15 +231,16 @@ contract PuppyRaffleTest is Test {
     // }
 
     // test to check ReEntrancy. Works, sort of.
-    function testHackRaffle() public {
+    function testHackRaffle( /* uint256 playersNum */ ) public {
         // players entering the raffle
-        uint256 playersNum = 510;
+        uint256 playersNum = 511;
         address[] memory players = new address[](playersNum);
         for (uint256 i = 0; i < playersNum; i++) {
             players[i] = address(i);
         }
         puppyRaffle.enterRaffle{value: entranceFee * playersNum}(players);
-        console.log("Total number of players before Reentrancy: ", players.length);
+        uint256 playersInTheRaffle = puppyRaffle.numberOfPlayers();
+        console.log("Total number of players before Reentrancy: ", playersInTheRaffle);
         // ReEntrancy Begins
         uint256 startingRaffleBalance = address(puppyRaffle).balance;
         console.log("Raffle contract balance before Reentrancy: ", startingRaffleBalance);

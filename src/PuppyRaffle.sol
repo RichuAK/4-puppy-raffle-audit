@@ -222,4 +222,9 @@ contract PuppyRaffle is ERC721, Ownable {
             )
         );
     }
+
+    // added for audit
+    function numberOfPlayers() public view returns (uint256) {
+        return players.length;
+    }
 }
